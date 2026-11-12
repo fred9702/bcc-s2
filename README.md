@@ -100,7 +100,7 @@ The project `.actrc` pins the runner image (`catthehacker/ubuntu:act-latest`, na
 | Command | Workflow / job | Event | Time* |
 |---|---|---|---|
 | `make act` | CI gates + native app tests | push | ~2 min |
-| `make act-ci` | `ci.yml`: lint, test, security, infra | push | ~1.5 min |
+| `make act-ci` | `ci.yml`: lint, test, security, infra (one act run each; `CI_GATES="lint test"` to pick) | push | ~2.5 min |
 | `make act-native` | `app-tests.yml`: native AppTest | push | ~45 s |
 | `make act-e2e` | `app-tests.yml`: Playwright in the Playwright image | pull_request into `main` | ~40 s |
 | `make act-image` | `ci.yml`: image build, smoke, Trivy, SBOM (runs gates first) | push | slow |
@@ -150,6 +150,14 @@ uv run --group data python scripts/fetch_data.py   # fails if prices.csv > 1 MiB
 - Terraform state is local for the simulation. An S3 backend with native locking is stubbed in `infra/live/root.hcl`.
 - Prod apply is mocked. A real prod would assume an OIDC role and target EKS.
 - Only the Trivy action is SHA-pinned. Pinning all actions by SHA is the next hardening step.
+
+## Next steps
+
+- **Observability:** expose Prometheus metrics (`prometheus_client` on a side port: page views, CSV load time, session count), scrape via kube-prometheus-stack with a `ServiceMonitor`, and keep Grafana dashboards as code (Jsonnet/grafonnet compiled in CI). Add SLO-based alerts on availability and latency.
+- **Python 3.15:** upgrade builder and runtime images, `.python-version`, `requires-python` and tool targets together (Dependabot is set to ignore runtime-only bumps).
+- **Supply chain:** pin every action by commit SHA, and make the cosign signing and SBOM attestation real (keyless via GitHub OIDC).
+- **Prod:** S3 state backend, GitHub OIDC → AWS role → EKS, TLS on the Ingress via cert-manager.
+- **Data:** a scheduled job to refresh the CSV snapshot and open a PR.
 
 ## Credits
 
