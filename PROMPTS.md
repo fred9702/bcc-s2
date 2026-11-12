@@ -36,6 +36,10 @@ Outcome: `scripts/fetch_data.py` snapshots VOD.L + 7 telecom peers (5y daily, ~5
 
 Outcome: env-driven config, validated CSV loading, pure analytics module (100% covered), five tabs (candlestick+SMA, peer comparison & correlation, rolling vol/drawdown, 3D vol surface with smile/term-structure slices, data download). Verified visually with Playwright before opening the PR.
 
+> "Did you credit the authors of the dashboard?"
+
+Outcome: credits for streamlit/demo-stockpeers (Apache-2.0, concept only, no code copied) and yfinance added to README and the app sidebar.
+
 ## 5. Docker
 
 > "Containerised with Python Slim + Multi Stage build… UV or Poetry?" → uv.
