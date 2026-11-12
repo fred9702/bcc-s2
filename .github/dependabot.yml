@@ -9,6 +9,12 @@ updates:
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
+    ignore:
+      # Python minor upgrades touch builder + runtime images, .python-version,
+      # requires-python and tool targets together; do them deliberately, not via a
+      # runtime-only bump (which breaks the 3.12 venv copied from the builder).
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: terraform
     directory: /infra/modules/streamlit-app
     schedule: { interval: weekly }

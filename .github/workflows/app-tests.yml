@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
@@ -42,7 +42,7 @@ jobs:
       UV_PYTHON_DOWNLOADS: never   # use the image's Python 3.12
       E2E_WORKERS: auto            # override locally: act ... --env E2E_WORKERS=2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # pip, not astral-sh/setup-uv: JS actions need Node inside the job container,
       # which the Playwright image lacks under act (GitHub injects its own Node).
       - name: Install uv
