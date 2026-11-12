@@ -1,0 +1,7 @@
+{
+  "pull_request": {
+    "number": 0,
+    "base": { "ref": "main" },
+    "head": { "ref": "local" }
+  }
+}

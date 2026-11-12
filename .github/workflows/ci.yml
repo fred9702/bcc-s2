@@ -68,6 +68,7 @@ jobs:
           uv export --frozen --no-dev --no-hashes --no-emit-project > requirements.txt
           uv run pip-audit -r requirements.txt --strict --progress-spinner off
       - name: gitleaks (secrets)
+        if: ${{ !env.ACT }}   # needs a real push payload; locally: pre-commit run gitleaks --all-files
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

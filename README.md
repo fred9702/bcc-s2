@@ -20,7 +20,7 @@ flowchart LR
     IMG[buildx → smoke test → Trivy → SBOM → GHCR]
   end
   subgraph CD["CD (minikube in runner)"]
-    STG[staging: terragrunt apply + smoke] --> PRD[prod: approval → plan → mock apply]
+    STG[staging: terragrunt apply] --> PRD[prod: approval → plan → mock apply]
   end
   CSV --> IMG
   IMG --> STG
@@ -51,10 +51,10 @@ flowchart LR
 | Workflow | Trigger | What |
 |---|---|---|
 | `ci.yml` | push to `main`, manual | lint, tests, security scans, infra validate, image build/smoke/Trivy/SBOM, GHCR push |
-| `cd.yml` | CI success on `main` | staging: real minikube deploy + smoke test; prod: approval → real plan → mocked apply |
+| `cd.yml` | CI success on `main` | staging: real minikube deploy (rollout gated by probes); prod: approval → real plan → mocked apply |
 | `app-tests.yml` | branch push / PR → `main` | native AppTest on branches, Playwright on PRs |
 
-**Placeholders** (mocked, logged as `::notice`): SonarQube, Snyk, license compliance, cosign sign/attest, tflint, Infracost, OWASP ZAP, Slack/Teams notify, prod EKS apply.
+**Placeholders** (mocked, logged as `::notice`): SonarQube, Snyk, license compliance, cosign sign/attest, tflint, Infracost, Slack/Teams notify, prod EKS apply.
 
 **Repo governance**: rulesets (protect `main`, require PR + checks, immutable `v*` tags), secret scanning push protection, Dependabot (actions/uv/docker/terraform), pre-commit (ruff, gitleaks).
 
@@ -82,10 +82,37 @@ make k8s-destroy ENV=staging
 
 ### GitHub Actions locally (act)
 
+[act](https://github.com/nektos/act) runs the workflows in Docker on your machine. That's useful because CI only runs on `main` to save free-tier minutes. Verified on Apple silicon with Colima (act 0.2.97).
+
+**Setup**
+
 ```bash
-make act-list
-make act                               # CI lint + test jobs in Docker
+brew install act
+make act-list          # list jobs
 ```
+
+The project `.actrc` pins the runner image (`catthehacker/ubuntu:act-latest`, native arm64 on Apple silicon). Host-specific flags live in `ACT_FLAGS` in the Makefile, because act refuses them in a project `.actrc`:
+- `--container-daemon-socket /var/run/docker.sock`: the socket *inside* the Colima/Docker Desktop VM. Without it, Colima fails with `error while creating mount source path ... docker.sock`.
+- `--artifact-server-path .act/artifacts`: without it, `actions/upload-artifact` fails with `Unable to get the ACTIONS_RUNTIME_TOKEN`.
+
+**Run**
+
+| Command | Workflow / job | Event | Time* |
+|---|---|---|---|
+| `make act` | CI gates + native app tests | push | ~2 min |
+| `make act-ci` | `ci.yml`: lint, test, security, infra | push | ~1.5 min |
+| `make act-native` | `app-tests.yml`: native AppTest | push | ~45 s |
+| `make act-e2e` | `app-tests.yml`: Playwright in the Playwright image | pull_request into `main` | ~40 s |
+| `make act-image` | `ci.yml`: image build, smoke, Trivy, SBOM (runs gates first) | push | slow |
+
+\*Warm caches, M-series Mac. Event payloads live in `.github/act/` (`push.json`, `pull_request.json` with `base.ref: main`, so the `branches: [main]` filters match).
+
+**Behaves differently under act** (act sets `ACT=true`):
+- **gitleaks** step is skipped (the action needs a real push payload with commits). Run `uv run pre-commit run gitleaks --all-files` instead.
+- **e2e** runs in the Playwright container, where JS actions have no Node. So the job installs uv with pip and skips the trace upload under act. `E2E_WORKERS` (default 2 locally, `auto` in CI) caps xdist workers so a small Docker VM isn't starved.
+- **GHCR push** only happens on `refs/heads/main`. The act push payload uses `refs/heads/local`, so nothing is published.
+- **CD** (`cd.yml`) isn't run under act: `workflow_run` isn't supported, and minikube inside an act container is impractical. Use `make k8s-deploy` / `make k8s-plan ENV=prod`, which run the same Terragrunt commands.
+- **Secrets:** none are needed for the jobs above. To pass one: `make act-ci ACT_FLAGS+='-s NAME=value'`.
 
 ### Refresh data
 
