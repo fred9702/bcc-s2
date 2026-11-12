@@ -7,6 +7,8 @@ BlueCrest Capital – Stage 2 take-home: a containerised **Streamlit market dash
 ```bash
 uv sync
 uv run pre-commit install
+uv run streamlit run src/bcc_s2/app.py   # http://localhost:8501
+uv run pytest
 ```
 
 ## Repo layout
@@ -14,6 +16,8 @@ uv run pre-commit install
 | Path | Purpose |
 |---|---|
 | `src/bcc_s2/` | Streamlit app package |
+| `scripts/fetch_data.py` | yfinance snapshot → `data/*.csv` |
+| `tests/` | pytest: data, analytics, Streamlit AppTest |
 | `lat.md/` | Architecture knowledge graph ([lat.md](https://www.npmjs.com/package/lat.md)) used with Claude Code |
 | `PROMPTS.md` | AI usage and key prompts |
 
