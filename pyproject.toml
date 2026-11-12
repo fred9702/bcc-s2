@@ -1,0 +1,48 @@
+[project]
+name = "bcc-s2"
+version = "0.1.0"
+description = "Streamlit market dashboard (timeseries + vol surface) read from CSV at startup"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.1.1",
+    "plotly>=7.1.0",
+    "streamlit>=1.67.0",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "mypy>=2.4.1",
+    "pandas-stubs>=3.1.0.261029",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.7.0",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "N"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=bcc_s2 --cov-report=term-missing"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
