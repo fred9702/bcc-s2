@@ -14,3 +14,5 @@ htmlcov/
 .DS_Store
 .lat-build
 lat.md/.cache/parsed/
+.playwright-mcp/
+.act/
