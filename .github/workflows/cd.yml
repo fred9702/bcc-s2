@@ -77,20 +77,6 @@ jobs:
           echo "switch KUBE_CONTEXT to the prod EKS cluster and run: terragrunt run --all apply tfplan"
           echo "Image ghcr.io/${{ github.repository }}:${IMAGE_TAG} (signed, SBOM attested) would be deployed to bcc-prod."
 
-      - name: Smoke test (staging)
-        if: matrix.env == 'staging'
-        run: |
-          kubectl -n bcc-staging rollout status deploy/bcc-dashboard --timeout=180s
-          kubectl -n bcc-staging get all
-          kubectl -n bcc-staging port-forward svc/bcc-dashboard 8080:80 &
-          for _ in $(seq 1 30); do curl -sf localhost:8080/_stcore/health && break; sleep 2; done
-          curl -sf localhost:8080/ | grep -q "<title>" && echo "UI served"
-          kubectl -n bcc-staging exec deploy/bcc-dashboard -- printenv APP_ENV APP_VERSION DATA_DIR
-
-      - name: "[placeholder] DAST (OWASP ZAP baseline)"
-        if: matrix.env == 'staging'
-        run: echo "::notice title=ZAP::MOCK - would run zap-baseline.py -t http://localhost:8080"
-
       - name: Diagnostics on failure
         if: failure()
         run: |

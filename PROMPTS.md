@@ -70,7 +70,11 @@ Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + require
 
 > "Workflow with Matrix deployment to staging/prod?" … "I suggested minikube to simulate deployments as close to reality as possible."
 
-Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner with smoke tests; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. ZAP DAST and notifications are placeholders.
+Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. Notifications are a placeholder.
+
+> *(Human edit during review)* Removed the CD staging smoke-test and ZAP placeholder steps: "it's just added complexity and slowness."
+
+Outcome: staging relies on Terraform's `wait_for_rollout` (probes must pass) as the deploy gate. The human also renamed the module's resources from `this` to `bccs2` and raised `required_version` to `>= 1.17.2`, choosing not to add `moved` blocks (state for the minikube simulation is disposable).
 
 ## 9. App testing
 
@@ -87,6 +91,10 @@ Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble`
 > "Please add placeholders for any tooling … please include key prompts."
 
 Outcome: README with a Mermaid architecture diagram, features, pipeline table, design decisions, known limitations, credits; `make act` / `make act-list` to run CI jobs locally.
+
+> "Add guidance on running workflows locally with act"
+
+Outcome: verified with real act runs on Colima/Apple silicon (native 23 passed, e2e 11 passed in the Playwright container, CI lint passed). Findings baked into the workflow: JS actions need Node inside job containers (the Playwright image has none under act), so the e2e job installs uv via pip and skips artifact upload when `ACT` is set; `E2E_WORKERS` caps xdist workers locally. act 0.2.97 refuses `--container-daemon-socket` in a project `.actrc`, so it goes on the command line.
 
 ## How AI was used (summary)
 
