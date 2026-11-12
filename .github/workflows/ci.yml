@@ -30,7 +30,7 @@ jobs:
       - name: mypy
         run: uv run mypy src
       - name: hadolint
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.5.0
         with: { dockerfile: Dockerfile }
       - name: lat.md knowledge graph
         run: npx -y lat.md@0.13.3 check
