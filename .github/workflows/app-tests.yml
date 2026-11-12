@@ -1,0 +1,49 @@
+name: App tests
+
+# Native Streamlit AppTest suite on every branch push (fast, no browser);
+# full Playwright browser suite on PRs into main. Both driven by pytest.
+on:
+  push:
+    branches-ignore: [main]   # main is covered by CI
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-tests-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native app tests (AppTest)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
+      - run: uv sync --locked
+      - run: uv run pytest
+
+  e2e:
+    name: Playwright e2e
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
+      - run: uv sync --locked
+      - name: Install Chromium
+        run: uv run playwright install --with-deps chromium
+      - name: pytest -m e2e
+        run: uv run pytest -m e2e --no-cov --tracing=retain-on-failure --screenshot=only-on-failure --output=test-results
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/

@@ -22,6 +22,7 @@ dev = [
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
+    "pytest-playwright>=0.10.0",
     "ruff>=0.17.5",
 ]
 
@@ -46,7 +47,10 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q --cov=bcc_s2 --cov-report=term-missing"
+addopts = "-q -m 'not e2e' --cov=bcc_s2 --cov-report=term-missing"
+markers = [
+  "e2e: full browser tests with Playwright against a live Streamlit server (pytest -m e2e)",
+]
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]

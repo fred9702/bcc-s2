@@ -7,3 +7,4 @@ This directory defines the high-level concepts, business logic, and architecture
 - [[ci]] — GitHub Actions quality gates, security scans, image build and placeholders
 - [[infra]] — Terraform Kubernetes module, Terragrunt environments, minikube simulation
 - [[cd]] — staging deploy to minikube in Actions, approval-gated prod plan + mocked apply
+- [[testing]] — unit, native AppTest and Playwright e2e suites, all via pytest

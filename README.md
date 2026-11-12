@@ -8,7 +8,8 @@ BlueCrest Capital – Stage 2 take-home: a containerised **Streamlit market dash
 uv sync
 uv run pre-commit install
 uv run streamlit run src/bcc_s2/app.py   # http://localhost:8501
-uv run pytest
+uv run pytest                          # unit + native Streamlit AppTest
+make e2e                               # Playwright browser tests (pytest -m e2e)
 make docker-build docker-run           # containerised
 ```
 
@@ -27,7 +28,7 @@ make k8s-destroy ENV=staging
 |---|---|
 | `src/bcc_s2/` | Streamlit app package |
 | `scripts/fetch_data.py` | yfinance snapshot → `data/*.csv` |
-| `tests/` | pytest: data, analytics, Streamlit AppTest |
+| `tests/` | pytest: unit, `app/` native AppTest, `e2e/` Playwright |
 | `infra/modules/streamlit-app/` | Terraform module (Kubernetes provider) |
 | `infra/live/` | Terragrunt: `root.hcl`, `_envcommon/`, `staging/`, `prod/` |
 | `lat.md/` | Architecture knowledge graph ([lat.md](https://www.npmjs.com/package/lat.md)) used with Claude Code |

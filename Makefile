@@ -1,14 +1,16 @@
 IMAGE ?= bcc-s2
 TAG   ?= local
 
-.PHONY: install run test lint docker-build docker-run
+.PHONY: install run test e2e lint docker-build docker-run
 
 install:      ## install deps + git hooks
 	uv sync && uv run pre-commit install
 run:          ## run app locally on :8501
 	uv run streamlit run src/bcc_s2/app.py
-test:
+test:        ## native unit + Streamlit AppTest suite
 	uv run pytest
+e2e:          ## Playwright browser suite against a live server
+	uv run playwright install chromium && uv run pytest -m e2e --no-cov
 lint:         ## ruff, mypy, bandit, hadolint
 	uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run bandit -q -r src -c pyproject.toml && hadolint Dockerfile
 docker-build:

@@ -71,3 +71,9 @@ Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + require
 > "Workflow with Matrix deployment to staging/prod?" … "I suggested minikube to simulate deployments as close to reality as possible."
 
 Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner with smoke tests; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. ZAP DAST and notifications are placeholders.
+
+## 9. App testing
+
+> "Implement Native App Testing for the Streamlit App (docs.streamlit.io/develop/concepts/app-testing). Native App Tests run on branches and full Playwright testing on PRs into main. Run everything from pytest."
+
+Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e2e/` pytest-playwright suite against a live server started by a session fixture. `pytest` runs native, `pytest -m e2e` runs browser tests. New `app-tests.yml`: native on branch pushes, Playwright on PRs into main. The AI found `st.cache_data` leaking between AppTest runs (missing-data test passed on cached prices) and added a cache-clearing fixture; a segmented-control locator was fixed by asserting on behaviour (total return changes) rather than a role.
