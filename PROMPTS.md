@@ -70,4 +70,4 @@ Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + require
 
 > "Workflow with Matrix deployment to staging/prod?" … "I suggested minikube to simulate deployments as close to reality as possible."
 
-Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner with smoke tests; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. ZAP DAST and notifications are placeholders.
+Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. Notifications are a placeholder.

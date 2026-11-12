@@ -1,0 +1,59 @@
+name: App tests
+
+# Native Streamlit AppTest suite on every branch push (fast, no browser);
+# full Playwright browser suite on PRs into main. Both driven by pytest.
+on:
+  push:
+    branches-ignore: [main]   # main is covered by CI
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-tests-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native app tests (AppTest)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
+      - run: uv sync --locked
+      - run: uv run pytest
+
+  e2e:
+    name: Playwright e2e
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Official Playwright image: browsers + system deps preinstalled.
+    # Tag must match the pinned `playwright` version in pyproject.toml.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble
+      options: --ipc=host   # Chromium needs more shared memory than Docker's 64 MB default
+    env:
+      UV_PYTHON_DOWNLOADS: never   # use the image's Python 3.12
+      E2E_WORKERS: auto            # override locally: act ... --env E2E_WORKERS=2
+    steps:
+      - uses: actions/checkout@v4
+      # pip, not astral-sh/setup-uv: JS actions need Node inside the job container,
+      # which the Playwright image lacks under act (GitHub injects its own Node).
+      - name: Install uv
+        run: pip install --quiet --break-system-packages uv
+      - run: uv sync --locked
+      - name: pytest -m e2e (parallel, pytest-xdist)
+        run: >-
+          uv run pytest -m e2e --no-cov -n "$E2E_WORKERS"
+          --tracing=retain-on-failure --screenshot=only-on-failure --output=test-results
+      - uses: actions/upload-artifact@v4
+        if: failure() && !env.ACT   # JS action; no Node in the container under act
+        with:
+          name: playwright-traces
+          path: test-results/
