@@ -5,3 +5,4 @@ This directory defines the high-level concepts, business logic, and architecture
 - [[app]] — Streamlit dashboard: configuration, data loading, analytics and views
 - [[packaging]] — multi-stage uv Docker image, non-root runtime, healthcheck
 - [[ci]] — GitHub Actions quality gates, security scans, image build and placeholders
+- [[infra]] — Terraform Kubernetes module, Terragrunt environments, minikube simulation

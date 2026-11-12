@@ -15,3 +15,4 @@ htmlcov/
 .lat-build
 lat.md/.cache/parsed/
 .playwright-mcp/
+.act/
