@@ -87,9 +87,35 @@ jobs:
       - name: "[placeholder] License compliance"
         run: echo "::notice title=Licenses::MOCK - would run pip-licenses / FOSSA against an allow-list"
 
+  infra:
+    name: Terraform & Terragrunt validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_wrapper: false }
+      - name: Install Terragrunt
+        run: |
+          curl -sSL -o /usr/local/bin/terragrunt \
+            https://github.com/gruntwork-io/terragrunt/releases/download/v1.2.2/terragrunt_linux_amd64
+          chmod +x /usr/local/bin/terragrunt
+      - name: terraform fmt / validate (module)
+        working-directory: infra/modules/streamlit-app
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false -input=false
+          terraform validate
+      - name: terragrunt hcl fmt
+        working-directory: infra/live
+        run: terragrunt hcl fmt --check
+      - name: "[placeholder] tflint"
+        run: echo "::notice title=tflint::MOCK - would run tflint --recursive with the kubernetes ruleset"
+      - name: "[placeholder] Infracost"
+        run: echo "::notice title=Infracost::MOCK - would post a cost diff for the prod EKS stack on PRs"
+
   image:
     name: Build, scan & publish image
-    needs: [lint, test, security]
+    needs: [lint, test, security, infra]
     runs-on: ubuntu-latest
     permissions:
       contents: read

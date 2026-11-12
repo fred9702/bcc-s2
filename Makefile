@@ -15,3 +15,18 @@ docker-build:
 	docker build -t $(IMAGE):$(TAG) --build-arg APP_VERSION=$(TAG) .
 docker-run:
 	docker run --rm -p 8501:8501 -e APP_ENV=docker $(IMAGE):$(TAG)
+
+# ---------- local Kubernetes (minikube + Terragrunt) ----------
+ENV ?= staging
+.PHONY: k8s-up k8s-deploy k8s-plan k8s-url k8s-destroy
+k8s-up:       ## start minikube with metrics-server (for HPA)
+	minikube start --driver=docker --cpus=2 --memory=3072 --addons=metrics-server
+k8s-plan:
+	cd infra/live/$(ENV) && IMAGE=$(IMAGE) IMAGE_TAG=$(TAG) terragrunt run --all --non-interactive -- plan
+k8s-deploy: docker-build  ## build, load image into minikube, terragrunt apply ENV
+	minikube image load $(IMAGE):$(TAG)
+	cd infra/live/$(ENV) && IMAGE=$(IMAGE) IMAGE_TAG=$(TAG) terragrunt run --all --non-interactive -- apply -auto-approve
+k8s-url:      ## port-forward the service to localhost:8080
+	kubectl -n bcc-$(ENV) port-forward svc/bcc-dashboard 8080:80
+k8s-destroy:
+	cd infra/live/$(ENV) && terragrunt run --all --non-interactive -- destroy -auto-approve

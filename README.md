@@ -12,6 +12,15 @@ uv run pytest
 make docker-build docker-run           # containerised
 ```
 
+## Local Kubernetes (minikube + Terragrunt)
+
+```bash
+make k8s-up                   # minikube + metrics-server
+make k8s-deploy ENV=staging   # build image, load into minikube, terragrunt apply
+make k8s-url ENV=staging      # http://localhost:8080
+make k8s-destroy ENV=staging
+```
+
 ## Repo layout
 
 | Path | Purpose |
@@ -19,6 +28,8 @@ make docker-build docker-run           # containerised
 | `src/bcc_s2/` | Streamlit app package |
 | `scripts/fetch_data.py` | yfinance snapshot → `data/*.csv` |
 | `tests/` | pytest: data, analytics, Streamlit AppTest |
+| `infra/modules/streamlit-app/` | Terraform module (Kubernetes provider) |
+| `infra/live/` | Terragrunt: `root.hcl`, `_envcommon/`, `staging/`, `prod/` |
 | `lat.md/` | Architecture knowledge graph ([lat.md](https://www.npmjs.com/package/lat.md)) used with Claude Code |
 | `PROMPTS.md` | AI usage and key prompts |
 

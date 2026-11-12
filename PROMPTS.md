@@ -55,3 +55,13 @@ Outcome: lint/test/security gates → image build, container smoke test, Trivy, 
 > "Only run GHA on main, there's limited credits on the Free tier."
 
 Outcome: CI triggers on `push: main` + `workflow_dispatch` only; PR branches are validated locally with `act`.
+
+## 7. Infrastructure
+
+> "In my current role, we use Terraform K8s provider and build TF modules with it… I wanted to look into Terragrunt because that's what BCC uses. I suggested minikube to simulate deployments as close to reality as possible."
+
+Outcome: `infra/modules/streamlit-app` (namespace with PSA `restricted`, CSV ConfigMap with checksum-triggered rollouts, hardened Deployment, Service, HPA, PDB, NetworkPolicy) and a Terragrunt `live/` tree (`root.hcl` generating provider/backend, `_envcommon`, staging/prod inputs). Applied for real to minikube. The first apply hung: PSA rejected pods because the Kubernetes provider sends container-level `runAsNonRoot=false` by default; the AI diagnosed it from namespace events and set it explicitly.
+
+> "Add classic GH rulesets for bcc-s2 via gh cli: main-branch-protection, require-pr-and-status-checks (and any other recommended)"
+
+Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + required checks with admin PR-bypass, since CI is billing-blocked and main-only; release tags `v*` immutable), plus secret scanning push protection and Dependabot alerts/security updates.
