@@ -62,6 +62,10 @@ with st.sidebar:
     window = st.slider("Rolling window (days)", 5, 120, 20)
     st.caption(f"Data: {lo} → {hi} · {len(tickers)} tickers")
     st.caption(f"env **{settings.app_env}** · version `{settings.app_version}`")
+    st.caption(
+        "Inspired by [streamlit/demo-stockpeers](https://github.com/streamlit/demo-stockpeers)"
+        " (Apache-2.0) · data: Yahoo Finance via yfinance"
+    )
 
 selected = [focus, *peers]
 closes_all = a.close_matrix(prices)[selected]

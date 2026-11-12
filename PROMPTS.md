@@ -35,3 +35,7 @@ Outcome: `scripts/fetch_data.py` snapshots VOD.L + 7 telecom peers (5y daily, ~5
 > "Build the Streamlit app: read the CSVs at startup, VOD.L focus vs peers, make it as rich as possible within the time box. Keep analytics pure and tested."
 
 Outcome: env-driven config, validated CSV loading, pure analytics module (100% covered), five tabs (candlestick+SMA, peer comparison & correlation, rolling vol/drawdown, 3D vol surface with smile/term-structure slices, data download). Verified visually with Playwright before opening the PR.
+
+> "Did you credit the authors of the dashboard?"
+
+Outcome: credits for streamlit/demo-stockpeers (Apache-2.0, concept only, no code copied) and yfinance added to README and the app sidebar.
