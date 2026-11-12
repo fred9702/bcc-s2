@@ -75,3 +75,17 @@ Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): 
 > *(Human edit during review)* Removed the CD staging smoke-test and ZAP placeholder steps: "it's just added complexity and slowness."
 
 Outcome: staging relies on Terraform's `wait_for_rollout` (probes must pass) as the deploy gate. The human also renamed the module's resources from `this` to `bccs2` and raised `required_version` to `>= 1.17.2`, choosing not to add `moved` blocks (state for the minikube simulation is disposable).
+
+## 9. App testing
+
+> "Implement Native App Testing for the Streamlit App (docs.streamlit.io/develop/concepts/app-testing). Native App Tests run on branches and full Playwright testing on PRs into main. Run everything from pytest."
+
+Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e2e/` pytest-playwright suite against a live server started by a session fixture. `pytest` runs native, `pytest -m e2e` runs browser tests. New `app-tests.yml`: native on branch pushes, Playwright on PRs into main. The AI found `st.cache_data` leaking between AppTest runs (missing-data test passed on cached prices) and added a cache-clearing fixture; a segmented-control locator was fixed by asserting on behaviour (total return changes) rather than a role.
+
+> "Ensure you use the Playwright base image for those tests + use pytest-xdist to run tests in parallel where appropriate"
+
+Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble` (with `--ipc=host`), and `playwright` is pinned to exactly 1.65.1 so library and browsers always match. `make e2e` uses the same image. pytest-xdist parallelises e2e (21s → 12s on the host); the native suite stays serial because xdist gave no gain at ~5s. The AI found `-n auto` failing locally from memory starvation (4 servers + 4 Chromiums in a Colima VM shared with minikube) and set local workers to 2, keeping `-n auto` on 16 GB CI runners.
+
+> "Add guidance on running workflows locally with act"
+
+Outcome: verified with real act runs on Colima/Apple silicon (native 23 passed, e2e 11 passed in the Playwright container, CI lint passed). Findings baked into the workflow: JS actions need Node inside job containers (the Playwright image has none under act), so the e2e job installs uv via pip and skips artifact upload when `ACT` is set; `E2E_WORKERS` caps xdist workers locally. act 0.2.97 refuses `--container-daemon-socket` in a project `.actrc`, so it goes on the command line.

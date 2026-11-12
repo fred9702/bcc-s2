@@ -1,14 +1,22 @@
 IMAGE ?= bcc-s2
 TAG   ?= local
 
-.PHONY: install run test lint docker-build docker-run
+.PHONY: install run test e2e e2e-local lint docker-build docker-run
 
 install:      ## install deps + git hooks
 	uv sync && uv run pre-commit install
 run:          ## run app locally on :8501
 	uv run streamlit run src/bcc_s2/app.py
-test:
+test:        ## native unit + Streamlit AppTest suite
 	uv run pytest
+PW_IMAGE ?= mcr.microsoft.com/playwright/python:v1.65.1-noble
+E2E_WORKERS ?= 2   # each worker = Streamlit server + Chromium; raise if Docker has the RAM
+e2e:          ## Playwright suite in the official Playwright image (same as CI), parallel
+	docker run --rm --ipc=host -v "$(CURDIR)":/work -w /work \
+	  -e UV_PROJECT_ENVIRONMENT=/opt/venv -e UV_PYTHON_DOWNLOADS=never $(PW_IMAGE) \
+	  bash -c "pip install -q --break-system-packages uv && uv sync -q --locked && uv run pytest -m e2e --no-cov -n $(E2E_WORKERS) -p no:cacheprovider"
+e2e-local:    ## Playwright suite on the host (faster iteration)
+	uv run playwright install chromium && uv run pytest -m e2e --no-cov -n auto
 lint:         ## ruff, mypy, bandit, hadolint
 	uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run bandit -q -r src -c pyproject.toml && hadolint Dockerfile
 docker-build:
