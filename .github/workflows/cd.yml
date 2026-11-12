@@ -1,0 +1,89 @@
+name: CD
+
+# Deploys after CI succeeds on main. Staging is a real deployment to an ephemeral
+# minikube cluster inside the runner; prod runs a real `terragrunt plan` against it,
+# then a mocked apply behind a manual-approval environment.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+env:
+  IMAGE: bcc-s2
+  IMAGE_TAG: ${{ github.event.workflow_run.head_sha || github.sha }}
+  TG_VERSION: v1.2.2
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.env }}
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1          # staging first, then prod
+      fail-fast: true
+      matrix:
+        env: [staging, prod]
+    environment:
+      name: ${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.IMAGE_TAG }}
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@v0.0.21
+        with:
+          driver: docker
+          addons: metrics-server
+          cpus: 2
+          memory: 4096m
+
+      - uses: hashicorp/setup-terraform@v4
+        with: { terraform_wrapper: false }
+
+      - name: Install Terragrunt
+        run: |
+          curl -sSL -o /usr/local/bin/terragrunt \
+            "https://github.com/gruntwork-io/terragrunt/releases/download/${TG_VERSION}/terragrunt_linux_amd64"
+          chmod +x /usr/local/bin/terragrunt
+
+      - name: Build image inside minikube
+        run: |
+          eval "$(minikube docker-env)"
+          docker build -t "$IMAGE:$IMAGE_TAG" --build-arg APP_VERSION="$IMAGE_TAG" .
+
+      - name: Terragrunt plan (${{ matrix.env }})
+        working-directory: infra/live/${{ matrix.env }}
+        run: terragrunt run --all --non-interactive -- plan -out=tfplan
+
+      - name: Terragrunt apply (staging)
+        if: matrix.env == 'staging'
+        working-directory: infra/live/staging
+        run: terragrunt run --all --non-interactive -- apply tfplan
+
+      - name: "[mock] Terragrunt apply (prod)"
+        if: matrix.env == 'prod'
+        run: |
+          echo "::notice title=Prod deploy::MOCK - would assume the prod deploy role via GitHub OIDC,"
+          echo "switch KUBE_CONTEXT to the prod EKS cluster and run: terragrunt run --all apply tfplan"
+          echo "Image ghcr.io/${{ github.repository }}:${IMAGE_TAG} (signed, SBOM attested) would be deployed to bcc-prod."
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get events -A --sort-by=.lastTimestamp | tail -30
+          kubectl -n bcc-${{ matrix.env }} describe pods || true
+          kubectl -n bcc-${{ matrix.env }} logs deploy/bcc-dashboard --tail=100 || true
+
+      - name: "[mock] Notify"
+        if: always()
+        run: echo "::notice title=Notify::MOCK - would post '${{ matrix.env }} deploy ${{ job.status }}' to Slack/Teams"
