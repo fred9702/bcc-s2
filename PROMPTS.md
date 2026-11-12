@@ -27,3 +27,9 @@ Outcome: AI clarified that breadth comes from Terraform (Terragrunt is a DRY/orc
 > "For stock peers, why don't we use a script that pulls <1MiB worth of yfinance data? Reduces UI toil."
 
 Outcome: `scripts/fetch_data.py` snapshots VOD.L + 7 telecom peers (5y daily, ~560 KiB) and a synthetic vol surface. Size guard keeps it ConfigMap-compatible. A yfinance SQLite cache lock (`database is locked`) on concurrent downloads was fixed by the AI with `threads=False` and an empty-ticker guard.
+
+## 4. App
+
+> "Build the Streamlit app: read the CSVs at startup, VOD.L focus vs peers, make it as rich as possible within the time box. Keep analytics pure and tested."
+
+Outcome: env-driven config, validated CSV loading, pure analytics module (100% covered), five tabs (candlestick+SMA, peer comparison & correlation, rolling vol/drawdown, 3D vol surface with smile/term-structure slices, data download). Verified visually with Playwright before opening the PR.

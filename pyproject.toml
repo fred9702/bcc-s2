@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Streamlit market dashboard (timeseries + vol surface) read from CSV at startup"
 requires-python = ">=3.12"
 dependencies = [
+    "numpy>=2.5.4",
     "pandas>=3.1.1",
     "plotly>=7.1.0",
     "streamlit>=1.67.0",
@@ -11,7 +12,6 @@ dependencies = [
 
 [dependency-groups]
 data = [
-    "numpy>=2.5.4",
     "yfinance>=1.8.0",
 ]
 dev = [
