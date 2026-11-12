@@ -33,3 +33,9 @@ Outcome: `scripts/fetch_data.py` snapshots VOD.L + 7 telecom peers (5y daily, ~5
 > "Build the Streamlit app: read the CSVs at startup, VOD.L focus vs peers, make it as rich as possible within the time box. Keep analytics pure and tested."
 
 Outcome: env-driven config, validated CSV loading, pure analytics module (100% covered), five tabs (candlestick+SMA, peer comparison & correlation, rolling vol/drawdown, 3D vol surface with smile/term-structure slices, data download). Verified visually with Playwright before opening the PR.
+
+## 5. Docker
+
+> "Containerised with Python Slim + Multi Stage build… UV or Poetry?" → uv.
+
+Outcome: uv builder stage → `python:3.12-slim` runtime, non-root, healthcheck, OCI labels. AI hit and fixed two issues: hadolint DL3025 (healthcheck in shell form) and a missing `buildx` plugin on the local Colima Docker setup.

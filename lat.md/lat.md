@@ -3,3 +3,4 @@ This directory defines the high-level concepts, business logic, and architecture
 - [[architecture]] — components, layers and key design decisions
 - [[data]] — market data snapshot (prices + vol surface) and its constraints
 - [[app]] — Streamlit dashboard: configuration, data loading, analytics and views
+- [[packaging]] — multi-stage uv Docker image, non-root runtime, healthcheck
