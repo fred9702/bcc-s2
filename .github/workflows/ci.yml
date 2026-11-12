@@ -21,7 +21,7 @@ jobs:
     name: Lint & type-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
@@ -39,7 +39,7 @@ jobs:
     name: Unit & app tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
@@ -56,7 +56,7 @@ jobs:
     name: SAST, SCA & secrets
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
@@ -91,7 +91,7 @@ jobs:
     name: Terraform & Terragrunt validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with: { terraform_wrapper: false }
       - name: Install Terragrunt
@@ -122,7 +122,7 @@ jobs:
       packages: write
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
       - id: meta
         uses: docker/metadata-action@v5
