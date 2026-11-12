@@ -26,6 +26,7 @@ flowchart LR
   IMG --> STG
   subgraph K8s["Kubernetes (Terraform k8s provider)"]
     CM[ConfigMap: CSVs] --> POD[Deployment<br/>non-root · RO rootfs · probes]
+    ING[Ingress: *.localhost] --> SVC
     POD --- SVC[Service] & HPA[HPA] & PDB[PDB] & NP[NetworkPolicy]
   end
   STG --> K8s
@@ -44,7 +45,7 @@ flowchart LR
 
 **Container**: multi-stage uv build → `python:3.12-slim`, non-root, healthcheck.
 
-**Kubernetes**: Terraform module (Namespace with PSA `restricted`, ConfigMap-mounted CSVs with checksum-triggered rollouts, hardened Deployment, Service, HPA, PDB, NetworkPolicy). Terragrunt `staging`/`prod` with different sizing.
+**Kubernetes**: Terraform module (Namespace with PSA `restricted`, ConfigMap-mounted CSVs with checksum-triggered rollouts, hardened Deployment, Service, Ingress, HPA, PDB, NetworkPolicy). Terragrunt `staging`/`prod` with different sizing.
 
 **Pipelines**
 
@@ -73,9 +74,11 @@ make docker-build docker-run           # containerised
 ### Local Kubernetes (minikube + Terragrunt)
 
 ```bash
-make k8s-up                            # minikube + metrics-server
+make k8s-up                            # minikube + metrics-server + ingress-nginx
 make k8s-deploy ENV=staging            # build image, load into minikube, terragrunt apply
-make k8s-url ENV=staging               # http://localhost:8080
+make k8s-tunnel                        # separate terminal (asks for sudo): Ingress on 127.0.0.1
+                                       #   → http://bcc-staging.localhost   (prod: http://bcc.localhost)
+make k8s-url ENV=staging               # fallback, no Ingress: http://localhost:8080
 make k8s-plan ENV=prod                 # prod plan (2–5 replicas, PDB)
 make k8s-destroy ENV=staging
 ```

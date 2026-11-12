@@ -4,7 +4,7 @@ Kubernetes resources are defined as a reusable Terraform module (Kubernetes prov
 
 ## Module
 
-[[infra/modules/streamlit-app]] creates a namespace, a ConfigMap holding the CSVs, a Deployment, Service, HPA, PodDisruptionBudget and NetworkPolicy.
+[[infra/modules/streamlit-app]] creates a namespace, a ConfigMap holding the CSVs, a Deployment, Service, Ingress, HPA, PodDisruptionBudget and NetworkPolicy.
 
 The namespace enforces Pod Security Admission `restricted`. Pods run non-root with a read-only root filesystem, all capabilities dropped and seccomp `RuntimeDefault`. `/tmp` is an emptyDir and `HOME=/tmp` so Streamlit can write its cache.
 
@@ -29,3 +29,11 @@ The HPA scales on CPU between `replicas` and `max_replicas`; Terraform ignores l
 Each environment has an `env.hcl` (name, kube context) and a `streamlit-app/terragrunt.hcl` with its own inputs: staging runs 1–2 replicas, prod 2–5 with larger requests/limits.
 
 State is local for the simulation; the S3 backend with native lockfile locking is stubbed in `root.hcl` for a real account. `IMAGE`, `IMAGE_TAG`, `KUBE_CONTEXT` and `KUBECONFIG` come from the environment.
+
+## Ingress
+
+An optional `kubernetes_ingress_v1` (on by default) routes `ingress_host` to the Service through ingress-nginx, installed by minikube's `ingress` addon.
+
+Hosts use `*.localhost` (`bcc-staging.localhost`, `bcc.localhost`), which resolve to 127.0.0.1 without DNS or `/etc/hosts` edits. On macOS with the docker driver the controller is only reachable via `minikube tunnel`.
+
+Proxy read/send timeouts are raised to 3600s because Streamlit holds one websocket per session and nginx's 60s default drops idle sessions. TLS via cert-manager is a noted TODO for prod.

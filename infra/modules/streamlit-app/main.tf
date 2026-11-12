@@ -240,3 +240,41 @@ resource "kubernetes_network_policy_v1" "bccs2" {
     }
   }
 }
+
+resource "kubernetes_ingress_v1" "bccs2" {
+  count = var.ingress_enabled ? 1 : 0
+
+  metadata {
+    name      = var.name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
+    labels    = local.labels
+    annotations = merge({
+      # Streamlit keeps a long-lived websocket per session; nginx's 60s default drops it
+      "nginx.ingress.kubernetes.io/proxy-read-timeout" = "3600"
+      "nginx.ingress.kubernetes.io/proxy-send-timeout" = "3600"
+      # TODO(prod): TLS via cert-manager, e.g. cert-manager.io/cluster-issuer = "letsencrypt"
+    }, var.ingress_annotations)
+  }
+
+  spec {
+    ingress_class_name = var.ingress_class_name
+
+    rule {
+      host = var.ingress_host
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = kubernetes_service_v1.bccs2.metadata[0].name
+              port { name = "http" }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  wait_for_load_balancer = false
+}

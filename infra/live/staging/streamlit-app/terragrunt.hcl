@@ -8,6 +8,7 @@ include "envcommon" {
 }
 
 inputs = {
+  ingress_host = "bcc-staging.localhost"
   namespace    = "bcc-staging"
   replicas     = 1
   max_replicas = 2

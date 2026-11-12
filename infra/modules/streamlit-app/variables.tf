@@ -76,3 +76,27 @@ variable "service_type" {
   type        = string
   default     = "ClusterIP"
 }
+
+variable "ingress_enabled" {
+  description = "Create an Ingress for the Service."
+  type        = bool
+  default     = true
+}
+
+variable "ingress_host" {
+  description = "Hostname routed to the dashboard. *.localhost resolves to 127.0.0.1 without DNS or /etc/hosts edits."
+  type        = string
+  default     = "bcc.localhost"
+}
+
+variable "ingress_class_name" {
+  description = "IngressClass to use (minikube's ingress addon installs ingress-nginx as 'nginx')."
+  type        = string
+  default     = "nginx"
+}
+
+variable "ingress_annotations" {
+  description = "Extra Ingress annotations, merged over the Streamlit websocket defaults."
+  type        = map(string)
+  default     = {}
+}

@@ -26,15 +26,17 @@ docker-run:
 
 # ---------- local Kubernetes (minikube + Terragrunt) ----------
 ENV ?= staging
-.PHONY: k8s-up k8s-deploy k8s-plan k8s-url k8s-destroy
-k8s-up:       ## start minikube with metrics-server (for HPA)
-	minikube start --driver=docker --cpus=2 --memory=3072 --addons=metrics-server
+.PHONY: k8s-up k8s-deploy k8s-plan k8s-url k8s-tunnel k8s-destroy
+k8s-up:       ## start minikube with metrics-server (HPA) and ingress-nginx
+	minikube start --driver=docker --cpus=2 --memory=3072 --addons=metrics-server --addons=ingress
 k8s-plan:
 	cd infra/live/$(ENV) && IMAGE=$(IMAGE) IMAGE_TAG=$(TAG) terragrunt run --all --non-interactive -- plan
 k8s-deploy: docker-build  ## build, load image into minikube, terragrunt apply ENV
 	minikube image load $(IMAGE):$(TAG)
 	cd infra/live/$(ENV) && IMAGE=$(IMAGE) IMAGE_TAG=$(TAG) terragrunt run --all --non-interactive -- apply -auto-approve
-k8s-url:      ## port-forward the service to localhost:8080
+k8s-tunnel:   ## expose the Ingress on 127.0.0.1:80/443 (macOS docker driver); keep running, may ask for sudo
+	minikube tunnel
+k8s-url:      ## fallback: port-forward the Service to localhost:8080
 	kubectl -n bcc-$(ENV) port-forward svc/bcc-dashboard 8080:80
 k8s-destroy:
 	cd infra/live/$(ENV) && terragrunt run --all --non-interactive -- destroy -auto-approve
