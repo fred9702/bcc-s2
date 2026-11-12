@@ -77,3 +77,16 @@ Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): 
 > "Implement Native App Testing for the Streamlit App (docs.streamlit.io/develop/concepts/app-testing). Native App Tests run on branches and full Playwright testing on PRs into main. Run everything from pytest."
 
 Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e2e/` pytest-playwright suite against a live server started by a session fixture. `pytest` runs native, `pytest -m e2e` runs browser tests. New `app-tests.yml`: native on branch pushes, Playwright on PRs into main. The AI found `st.cache_data` leaking between AppTest runs (missing-data test passed on cached prices) and added a cache-clearing fixture; a segmented-control locator was fixed by asserting on behaviour (total return changes) rather than a role.
+
+## 10. Docs
+
+> "Please add placeholders for any tooling … please include key prompts."
+
+Outcome: README with a Mermaid architecture diagram, features, pipeline table, design decisions, known limitations, credits; `make act` / `make act-list` to run CI jobs locally.
+
+## How AI was used (summary)
+
+- **Claude Code did the hands-on work**: scaffolding, code, tests, Dockerfile, Terraform/Terragrunt, workflows, docs. It ran every tool locally (pytest, ruff, mypy, bandit, pip-audit, hadolint, actionlint, terraform, terragrunt, minikube, Playwright), and opened each stacked PR via `gh`.
+- **The human steered and reviewed**: chose the stack (Terragrunt, minikube, Terraform k8s provider, uv, stacked PRs), challenged trade-offs (Kustomize vs Terragrunt), caught the missing credits, set CI cost constraints, asked for native + Playwright testing, reviewed and merged every PR.
+- **The AI found and fixed real issues**: yfinance cache lock, hadolint DL3025, missing buildx, PSA rejection from the provider's `runAsNonRoot` default, `st.cache_data` leaking across AppTest runs, a deleted `trivy-action` tag, and a GitHub billing lock blocking Actions.
+- **lat.md** kept a live architecture knowledge graph (`lat.md/`) that the agent updated and validated (`lat check`) with every PR.

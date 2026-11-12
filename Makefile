@@ -32,3 +32,10 @@ k8s-url:      ## port-forward the service to localhost:8080
 	kubectl -n bcc-$(ENV) port-forward svc/bcc-dashboard 8080:80
 k8s-destroy:
 	cd infra/live/$(ENV) && terragrunt run --all --non-interactive -- destroy -auto-approve
+
+# ---------- run GitHub Actions locally ----------
+.PHONY: act act-list
+act-list:     ## list workflow jobs act can run
+	act -l
+act:          ## run CI lint+test jobs locally (Apple silicon: amd64 runner image)
+	act push -W .github/workflows/ci.yml -j lint -j test --container-architecture linux/amd64
