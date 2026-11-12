@@ -9,6 +9,7 @@ uv sync
 uv run pre-commit install
 uv run streamlit run src/bcc_s2/app.py   # http://localhost:8501
 uv run pytest
+make docker-build docker-run           # containerised
 ```
 
 ## Repo layout

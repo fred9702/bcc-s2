@@ -39,3 +39,9 @@ Outcome: env-driven config, validated CSV loading, pure analytics module (100% c
 > "Did you credit the authors of the dashboard?"
 
 Outcome: credits for streamlit/demo-stockpeers (Apache-2.0, concept only, no code copied) and yfinance added to README and the app sidebar.
+
+## 5. Docker
+
+> "Containerised with Python Slim + Multi Stage build… UV or Poetry?" → uv.
+
+Outcome: uv builder stage → `python:3.12-slim` runtime, non-root, healthcheck, OCI labels. AI hit and fixed two issues: hadolint DL3025 (healthcheck in shell form) and a missing `buildx` plugin on the local Colima Docker setup.
