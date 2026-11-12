@@ -22,6 +22,10 @@ log = logging.getLogger("bcc_s2")
 
 st.set_page_config(page_title="BCC Market Dashboard", page_icon="📈", layout="wide")
 settings = load_settings()
+# keep KPI values readable on narrower viewports (Streamlit truncates long metric values)
+st.markdown(
+    "<style>[data-testid='stMetricValue']{font-size:1.6rem}</style>", unsafe_allow_html=True
+)
 
 
 @st.cache_data
@@ -78,11 +82,11 @@ st.caption(f"{focus} vs telecom peers · daily adjusted closes · local currenci
 s = a.summary(closes)
 c1, c2, c3, c4, c5 = st.columns(5)
 last, prev = closes[focus].iloc[-1], closes[focus].iloc[-2]
-c1.metric(f"{focus} last", f"{last:,.2f}", f"{(last / prev - 1):+.2%} 1D")
+c1.metric(f"{focus} last", f"{last:,.2f}", f"{(last / prev - 1):+.2%}", help="Delta = 1-day change")
 c2.metric("Total return", f"{s.loc[focus, 'Total return']:+.1%}")
 c3.metric("Ann. volatility", f"{s.loc[focus, 'Ann. vol']:.1%}")
 c4.metric("Sharpe (rf=0)", f"{s.loc[focus, 'Sharpe (rf=0)']:.2f}")
-c5.metric("Max drawdown", f"{s.loc[focus, 'Max drawdown']:.1%}")
+c5.metric("Max DD", f"{s.loc[focus, 'Max drawdown']:.1%}")
 
 tab_price, tab_peers, tab_risk, tab_surface, tab_data = st.tabs(
     ["Price", "Peers", "Risk", "Vol surface", "Data"]
@@ -119,7 +123,7 @@ with tab_price:
     fig.update_layout(
         height=600, xaxis_rangeslider_visible=False, margin={"t": 20}, legend={"orientation": "h"}
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 # ---------- Peers ----------
 with tab_peers:
@@ -129,7 +133,7 @@ with tab_peers:
         st.subheader("Normalised performance")
         st.plotly_chart(
             px.line(norm, labels={"value": "Rebased (1 = start)", "Ticker": ""}),
-            use_container_width=True,
+            width="stretch",
         )
     with right:
         st.subheader(f"{focus} vs peer average")
@@ -137,7 +141,7 @@ with tab_peers:
             rel = a.peer_relative(norm, focus).rename("Relative")
             st.plotly_chart(
                 px.area(rel, labels={"value": "Focus / peer avg"}).update_layout(showlegend=False),
-                use_container_width=True,
+                width="stretch",
             )
         else:
             st.info("Pick at least one peer.")
@@ -145,7 +149,7 @@ with tab_peers:
     corr = a.returns(closes).corr()
     st.plotly_chart(
         px.imshow(corr, text_auto=".2f", color_continuous_scale="RdBu_r", zmin=-1, zmax=1),
-        use_container_width=True,
+        width="stretch",
     )
     st.subheader("Summary")
     st.dataframe(
@@ -158,7 +162,7 @@ with tab_peers:
                 "Max drawdown": "{:.1%}",
             }
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 # ---------- Risk ----------
@@ -167,21 +171,19 @@ with tab_risk:
     with l2:
         st.subheader(f"Rolling {window}d annualised vol")
         rv = a.rolling_vol(closes_all, window).loc[pd.Timestamp(start) :]
-        st.plotly_chart(
-            px.line(rv, labels={"value": "Vol", "Ticker": ""}), use_container_width=True
-        )
+        st.plotly_chart(px.line(rv, labels={"value": "Vol", "Ticker": ""}), width="stretch")
     with r2:
         st.subheader("Drawdown from peak")
         st.plotly_chart(
             px.line(a.drawdown(closes), labels={"value": "Drawdown", "Ticker": ""}),
-            use_container_width=True,
+            width="stretch",
         )
     st.subheader("Daily return distribution")
     st.plotly_chart(
         px.histogram(
             a.returns(closes)[focus], nbins=80, labels={"value": f"{focus} daily return"}
         ).update_layout(showlegend=False),
-        use_container_width=True,
+        width="stretch",
     )
 
 # ---------- Vol surface ----------
@@ -207,7 +209,7 @@ with tab_surface:
             "camera": {"eye": {"x": -1.6, "y": -1.6, "z": 0.9}},
         },
     )
-    st.plotly_chart(fig3d, use_container_width=True)
+    st.plotly_chart(fig3d, width="stretch")
     l3, r3 = st.columns(2)
     with l3:
         tenor = st.select_slider("Smile at tenor (y)", options=list(grid.index), value=0.5)
@@ -215,7 +217,7 @@ with tab_surface:
             px.line(
                 grid.loc[tenor], markers=True, labels={"value": "IV", "Moneyness": "K/S"}
             ).update_layout(showlegend=False),
-            use_container_width=True,
+            width="stretch",
         )
     with r3:
         st.markdown("**ATM term structure**")
@@ -224,11 +226,11 @@ with tab_surface:
             px.line(atm, markers=True, labels={"value": "ATM IV", "Tenor": "Tenor"}).update_layout(
                 showlegend=False
             ),
-            use_container_width=True,
+            width="stretch",
         )
 
 # ---------- Data ----------
 with tab_data:
     view = prices[prices["Ticker"].isin(selected) & (prices["Date"] >= pd.Timestamp(start))]
-    st.dataframe(view, use_container_width=True, hide_index=True)
+    st.dataframe(view, width="stretch", hide_index=True)
     st.download_button("Download CSV", view.to_csv(index=False), "prices_filtered.csv", "text/csv")
