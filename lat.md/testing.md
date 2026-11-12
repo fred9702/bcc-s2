@@ -20,4 +20,12 @@ Covers title/KPIs, sidebar, Plotly rendering, every tab, the WebGL vol surface, 
 
 ## Where they run
 
-[[.github/workflows/app-tests.yml]] runs native tests on every non-main branch push and the Playwright suite on PRs into `main` (traces and screenshots uploaded on failure). CI on `main` runs the default suite.
+[[.github/workflows/app-tests.yml]] runs native tests on every non-main branch push and the Playwright suite on PRs into `main`. CI on `main` runs the default suite.
+
+The e2e job runs inside the official `mcr.microsoft.com/playwright/python` image (browsers and system deps preinstalled), whose tag must match the exact `playwright` pin in `pyproject.toml`. `make e2e` uses the same image locally.
+
+## Parallelism
+
+The e2e suite runs under pytest-xdist (`-n auto` in CI); each worker starts its own Streamlit server on a free port via the session fixture.
+
+The native suite stays serial: at ~5 s, xdist worker startup costs as much as it saves. Locally `make e2e` defaults to 2 workers because each worker is a server plus a Chromium and starves a small Docker VM.

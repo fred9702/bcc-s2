@@ -33,15 +33,22 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Official Playwright image: browsers + system deps preinstalled.
+    # Tag must match the pinned `playwright` version in pyproject.toml.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble
+      options: --ipc=host   # Chromium needs more shared memory than Docker's 64 MB default
+    env:
+      UV_PYTHON_DOWNLOADS: never   # use the image's Python 3.12
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
-      - name: Install Chromium
-        run: uv run playwright install --with-deps chromium
-      - name: pytest -m e2e
-        run: uv run pytest -m e2e --no-cov --tracing=retain-on-failure --screenshot=only-on-failure --output=test-results
+      - name: pytest -m e2e (parallel, pytest-xdist)
+        run: >-
+          uv run pytest -m e2e --no-cov -n auto
+          --tracing=retain-on-failure --screenshot=only-on-failure --output=test-results
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

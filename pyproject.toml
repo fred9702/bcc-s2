@@ -19,10 +19,12 @@ dev = [
     "mypy>=2.4.1",
     "pandas-stubs>=3.1.0.261029",
     "pip-audit>=2.10.1",
+    "playwright==1.65.1",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
     "pytest-playwright>=0.10.0",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.17.5",
 ]
 
@@ -47,7 +49,13 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# serial by default (native suite is ~5s; xdist startup costs as much as it saves).
+# e2e runs with -n auto: one Streamlit server + browser per worker.
 addopts = "-q -m 'not e2e' --cov=bcc_s2 --cov-report=term-missing"
+filterwarnings = [
+  # upstream pytest-base-url (pulled in by pytest-playwright), not our code
+  "ignore:Session-scoped fixtures defined as instance methods:pytest.PytestRemovedIn10Warning",
+]
 markers = [
   "e2e: full browser tests with Playwright against a live Streamlit server (pytest -m e2e)",
 ]

@@ -40,7 +40,7 @@ flowchart LR
 
 **Testing** (all via pytest)
 - Unit tests for data and analytics, plus a native Streamlit `AppTest` suite (`pytest`).
-- Playwright browser suite against a live server (`pytest -m e2e`).
+- Playwright browser suite against a live server (`pytest -m e2e`), run in the official Playwright image and parallelised with pytest-xdist.
 
 **Container**: multi-stage uv build → `python:3.12-slim`, non-root, healthcheck.
 
@@ -64,7 +64,8 @@ flowchart LR
 make install                           # uv sync + pre-commit hooks
 make run                               # http://localhost:8501
 make test                              # unit + native AppTest
-make e2e                               # Playwright browser tests
+make e2e                               # Playwright tests in the Playwright image (xdist)
+make e2e-local                         # same, on the host
 make lint                              # ruff, mypy, bandit, hadolint
 make docker-build docker-run           # containerised
 ```
