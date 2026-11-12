@@ -65,3 +65,9 @@ Outcome: `infra/modules/streamlit-app` (namespace with PSA `restricted`, CSV Con
 > "Add classic GH rulesets for bcc-s2 via gh cli: main-branch-protection, require-pr-and-status-checks (and any other recommended)"
 
 Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + required checks with admin PR-bypass, since CI is billing-blocked and main-only; release tags `v*` immutable), plus secret scanning push protection and Dependabot alerts/security updates.
+
+## 8. CD
+
+> "Workflow with Matrix deployment to staging/prod?" … "I suggested minikube to simulate deployments as close to reality as possible."
+
+Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner with smoke tests; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. ZAP DAST and notifications are placeholders.
