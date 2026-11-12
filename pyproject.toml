@@ -10,6 +10,10 @@ dependencies = [
 ]
 
 [dependency-groups]
+data = [
+    "numpy>=2.5.4",
+    "yfinance>=1.8.0",
+]
 dev = [
     "bandit>=1.9.4",
     "mypy>=2.4.1",
