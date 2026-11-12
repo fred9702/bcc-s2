@@ -12,3 +12,5 @@ htmlcov/
 *.tfstate.*
 .env
 .DS_Store
+.lat-build
+lat.md/.cache/parsed/

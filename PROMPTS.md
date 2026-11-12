@@ -1,0 +1,23 @@
+# AI usage & key prompts
+
+This project was built with **Claude Code** (Anthropic, model Claude Opus 5.5) on a paid subscription, driving the terminal, git, GitHub CLI and local tooling. The human role was product owner/architect: setting direction, challenging trade-offs, reviewing each stacked PR.
+
+Prompts are quoted verbatim (lightly trimmed), in order.
+
+## 1. Brief & ideas
+
+> *(Pasted the BlueCrest brief)* "I'm going to share some ideas first and then we'll crack on."
+
+> "Dataset: Kaggle stock-market dataset … Stock App: streamlit/demo-stockpeers … Containerised with Python Slim + Multi Stage build… UV or Poetry? Implement Act … Workflow with Matrix deployment to staging/prod? Terragrunt? DevSecOps applied … Minikube … Terraform + K8s provider: Create a Deployment module? Everything env var driven, Cloud Native principles. CSV mounted as a ConfigMap? Grafana/Prometheus? Dashboards as Code using JSONnet?"
+
+Outcome: AI recommended uv, a committed CSV subset, real (free) security scanners in CI with mocks for paid tools, and flagged Grafana as a stretch goal.
+
+## 2. Steering decisions
+
+> "I wanted to look into Terragrunt because that's what BCC uses. I suggested minikube to simulate deployments as close to reality as possible. For stock peers, why don't we use a script that pulls <1MiB worth of yfinance data? … In my current role, we use Terraform K8s provider and build TF modules with it… Stacked PRs pls."
+
+> "Wait, let's discuss Kustomize a bit more... Terragrunt essentially replaces Kustomize because it covers a wider range of providers, as opposed to just K8s?"
+
+Outcome: AI clarified that breadth comes from Terraform (Terragrunt is a DRY/orchestration wrapper), and that Terragrunt env inputs replace Kustomize overlays when workloads are managed via the TF Kubernetes provider. Trade-off recorded in `lat.md/architecture.md`.
+
+> "Call it bcc-s2. I also want lat.md initiated in the repo."
