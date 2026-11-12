@@ -25,3 +25,9 @@ Mocked steps emit `::notice` annotations so they are visible in the run summary:
 ## Supply chain
 
 Dependabot tracks Actions, uv, Docker and Terraform. Trivy's action is pinned by commit SHA because its old tags were repointed in March 2026; pinning every action by SHA is the next hardening step.
+
+## Running locally with act
+
+Make targets wrap act with the flags verified on Colima/Apple silicon; payloads for `push` and `pull_request` live in `.github/act/`.
+
+act refuses host-touching flags (`--container-daemon-socket`, `--artifact-server-path`) in a project `.actrc`, so they live in `ACT_FLAGS` in the Makefile. Steps that cannot work under act are guarded with `!env.ACT`: the gitleaks action (needs a real push payload) and artifact upload inside the Playwright container (no Node).

@@ -86,6 +86,19 @@ Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e
 
 Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble` (with `--ipc=host`), and `playwright` is pinned to exactly 1.65.1 so library and browsers always match. `make e2e` uses the same image. pytest-xdist parallelises e2e (21s → 12s on the host); the native suite stays serial because xdist gave no gain at ~5s. The AI found `-n auto` failing locally from memory starvation (4 servers + 4 Chromiums in a Colima VM shared with minikube) and set local workers to 2, keeping `-n auto` on 16 GB CI runners.
 
+## 10. Docs
+
+> "Please add placeholders for any tooling … please include key prompts."
+
+Outcome: README with a Mermaid architecture diagram, features, pipeline table, design decisions, known limitations, credits; `make act` / `make act-list` to run CI jobs locally.
+
 > "Add guidance on running workflows locally with act"
 
 Outcome: verified with real act runs on Colima/Apple silicon (native 23 passed, e2e 11 passed in the Playwright container, CI lint passed). Findings baked into the workflow: JS actions need Node inside job containers (the Playwright image has none under act), so the e2e job installs uv via pip and skips artifact upload when `ACT` is set; `E2E_WORKERS` caps xdist workers locally. act 0.2.97 refuses `--container-daemon-socket` in a project `.actrc`, so it goes on the command line.
+
+## How AI was used (summary)
+
+- **Claude Code did the hands-on work**: scaffolding, code, tests, Dockerfile, Terraform/Terragrunt, workflows, docs. It ran every tool locally (pytest, ruff, mypy, bandit, pip-audit, hadolint, actionlint, terraform, terragrunt, minikube, Playwright), and opened each stacked PR via `gh`.
+- **The human steered and reviewed**: chose the stack (Terragrunt, minikube, Terraform k8s provider, uv, stacked PRs), challenged trade-offs (Kustomize vs Terragrunt), caught the missing credits, set CI cost constraints, asked for native + Playwright testing, reviewed and merged every PR.
+- **The AI found and fixed real issues**: yfinance cache lock, hadolint DL3025, missing buildx, PSA rejection from the provider's `runAsNonRoot` default, `st.cache_data` leaking across AppTest runs, a deleted `trivy-action` tag, and a GitHub billing lock blocking Actions.
+- **lat.md** kept a live architecture knowledge graph (`lat.md/`) that the agent updated and validated (`lat check`) with every PR.

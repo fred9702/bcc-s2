@@ -38,3 +38,22 @@ k8s-url:      ## port-forward the service to localhost:8080
 	kubectl -n bcc-$(ENV) port-forward svc/bcc-dashboard 8080:80
 k8s-destroy:
 	cd infra/live/$(ENV) && terragrunt run --all --non-interactive -- destroy -auto-approve
+
+# ---------- run GitHub Actions locally (act) ----------
+# Host-specific flags must be on the command line: act refuses them in a project .actrc.
+# /var/run/docker.sock is the daemon socket *inside* the Colima/Docker Desktop VM.
+ACT_FLAGS ?= --container-daemon-socket /var/run/docker.sock --artifact-server-path .act/artifacts
+ACT_PUSH  = act push -e .github/act/push.json $(ACT_FLAGS)
+.PHONY: act act-list act-ci act-image act-native act-e2e
+act-list:     ## list the jobs act can run
+	act -l
+act-ci:       ## CI quality gates: lint, test, security, infra
+	$(ACT_PUSH) -W .github/workflows/ci.yml -j lint -j test -j security -j infra
+act-image:    ## CI image job (runs the gates first via needs:) - slow
+	$(ACT_PUSH) -W .github/workflows/ci.yml -j image
+act-native:   ## app-tests: native AppTest job (branch push)
+	$(ACT_PUSH) -W .github/workflows/app-tests.yml -j native
+act-e2e:      ## app-tests: Playwright job in the Playwright image (PR into main)
+	act pull_request -e .github/act/pull_request.json $(ACT_FLAGS) \
+	  -W .github/workflows/app-tests.yml -j e2e --env E2E_WORKERS=$(E2E_WORKERS)
+act: act-ci act-native  ## default: everything that runs on a branch/main push except the image build
