@@ -47,3 +47,7 @@ Outcome: uv builder stage → `python:3.12-slim` runtime, non-root, healthcheck,
 > "DevSecOps applied … Please add placeholders for any tooling you want to implement … mock functionality by printing a message on the action's logs."
 
 Outcome: lint/test/security gates → image build, container smoke test, Trivy, Syft SBOM, GHCR push on main. Placeholders (SonarQube, Snyk, licenses, cosign) emit `::notice` annotations. While pinning, the AI found `trivy-action@0.28.0` no longer resolves (old tags removed after the March 2026 tag-repointing incident) and pinned v0.36.0 by commit SHA. actionlint caught a shellcheck warning.
+
+> "Only run GHA on main, there's limited credits on the Free tier."
+
+Outcome: CI triggers on `push: main` + `workflow_dispatch` only; PR branches are validated locally with `act`.

@@ -1,6 +1,6 @@
 # CI
 
-GitHub Actions pipeline in [[.github/workflows/ci.yml]], run on every PR and on `main`. Free, real tools run for real; paid tools are placeholders that log what they would do.
+GitHub Actions pipeline in [[.github/workflows/ci.yml]], run on pushes to `main` and manual dispatch only, to conserve free-tier minutes; PRs are validated locally with `act`. Free, real tools run for real; paid tools are placeholders that log what they would do.
 
 ## Quality gates
 
