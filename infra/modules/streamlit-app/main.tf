@@ -19,7 +19,7 @@ locals {
   }, var.extra_env)
 }
 
-resource "kubernetes_namespace_v1" "this" {
+resource "kubernetes_namespace_v1" "bccs2" {
   metadata {
     name = var.namespace
     labels = {
@@ -32,16 +32,16 @@ resource "kubernetes_namespace_v1" "this" {
 resource "kubernetes_config_map_v1" "data" {
   metadata {
     name      = "${var.name}-data"
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
     labels    = local.labels
   }
   data = local.data
 }
 
-resource "kubernetes_deployment_v1" "this" {
+resource "kubernetes_deployment_v1" "bccs2" {
   metadata {
     name      = var.name
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
     labels    = local.labels
   }
 
@@ -167,10 +167,10 @@ resource "kubernetes_deployment_v1" "this" {
   }
 }
 
-resource "kubernetes_service_v1" "this" {
+resource "kubernetes_service_v1" "bccs2" {
   metadata {
     name      = var.name
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
     labels    = local.labels
   }
   spec {
@@ -184,10 +184,10 @@ resource "kubernetes_service_v1" "this" {
   }
 }
 
-resource "kubernetes_horizontal_pod_autoscaler_v2" "this" {
+resource "kubernetes_horizontal_pod_autoscaler_v2" "bccs2" {
   metadata {
     name      = var.name
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
     labels    = local.labels
   }
   spec {
@@ -196,7 +196,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "this" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment_v1.this.metadata[0].name
+      name        = kubernetes_deployment_v1.bccs2.metadata[0].name
     }
     metric {
       type = "Resource"
@@ -211,11 +211,11 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "this" {
   }
 }
 
-resource "kubernetes_pod_disruption_budget_v1" "this" {
+resource "kubernetes_pod_disruption_budget_v1" "bccs2" {
   count = var.replicas > 1 ? 1 : 0
   metadata {
     name      = var.name
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
     labels    = local.labels
   }
   spec {
@@ -224,10 +224,10 @@ resource "kubernetes_pod_disruption_budget_v1" "this" {
   }
 }
 
-resource "kubernetes_network_policy_v1" "this" {
+resource "kubernetes_network_policy_v1" "bccs2" {
   metadata {
     name      = "${var.name}-ingress"
-    namespace = kubernetes_namespace_v1.this.metadata[0].name
+    namespace = kubernetes_namespace_v1.bccs2.metadata[0].name
   }
   spec {
     pod_selector { match_labels = local.selector }
