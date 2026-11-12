@@ -65,3 +65,13 @@ Outcome: `infra/modules/streamlit-app` (namespace with PSA `restricted`, CSV Con
 > "Add classic GH rulesets for bcc-s2 via gh cli: main-branch-protection, require-pr-and-status-checks (and any other recommended)"
 
 Outcome: three rulesets via `gh api` (main: no deletion/force-push; PR + required checks with admin PR-bypass, since CI is billing-blocked and main-only; release tags `v*` immutable), plus secret scanning push protection and Dependabot alerts/security updates.
+
+## 8. CD
+
+> "Workflow with Matrix deployment to staging/prod?" … "I suggested minikube to simulate deployments as close to reality as possible."
+
+Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): staging is a real minikube deploy inside the runner; prod is approval-gated (GitHub Environment with required reviewer), runs a real `terragrunt plan` with prod inputs and a mocked apply. Notifications are a placeholder.
+
+> *(Human edit during review)* Removed the CD staging smoke-test and ZAP placeholder steps: "it's just added complexity and slowness."
+
+Outcome: staging relies on Terraform's `wait_for_rollout` (probes must pass) as the deploy gate. The human also renamed the module's resources from `this` to `bccs2` and raised `required_version` to `>= 1.17.2`, choosing not to add `moved` blocks (state for the minikube simulation is disposable).

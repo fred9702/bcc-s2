@@ -6,3 +6,4 @@ This directory defines the high-level concepts, business logic, and architecture
 - [[packaging]] — multi-stage uv Docker image, non-root runtime, healthcheck
 - [[ci]] — GitHub Actions quality gates, security scans, image build and placeholders
 - [[infra]] — Terraform Kubernetes module, Terragrunt environments, minikube simulation
+- [[cd]] — staging deploy to minikube in Actions, approval-gated prod plan + mocked apply
