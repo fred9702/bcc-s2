@@ -22,6 +22,11 @@ make docker-build docker-run           # containerised
 | `lat.md/` | Architecture knowledge graph ([lat.md](https://www.npmjs.com/package/lat.md)) used with Claude Code |
 | `PROMPTS.md` | AI usage and key prompts |
 
+## Credits
+
+- Dashboard concept (focus stock vs peers, rebased performance, stock-vs-peer-average view) inspired by [streamlit/demo-stockpeers](https://github.com/streamlit/demo-stockpeers) by the Streamlit team (Apache-2.0). This app is a re-implementation reading from CSV rather than live yfinance calls; no code was copied.
+- Market data from Yahoo Finance via [yfinance](https://github.com/ranaroussi/yfinance) (for personal/educational use).
+
 ## AI usage
 
 Built with Claude Code (Opus 5.5, paid subscription). See [PROMPTS.md](PROMPTS.md).
