@@ -77,3 +77,7 @@ Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): 
 > "Implement Native App Testing for the Streamlit App (docs.streamlit.io/develop/concepts/app-testing). Native App Tests run on branches and full Playwright testing on PRs into main. Run everything from pytest."
 
 Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e2e/` pytest-playwright suite against a live server started by a session fixture. `pytest` runs native, `pytest -m e2e` runs browser tests. New `app-tests.yml`: native on branch pushes, Playwright on PRs into main. The AI found `st.cache_data` leaking between AppTest runs (missing-data test passed on cached prices) and added a cache-clearing fixture; a segmented-control locator was fixed by asserting on behaviour (total return changes) rather than a role.
+
+> "Ensure you use the Playwright base image for those tests + use pytest-xdist to run tests in parallel where appropriate"
+
+Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble` (with `--ipc=host`), and `playwright` is pinned to exactly 1.65.1 so library and browsers always match. `make e2e` uses the same image. pytest-xdist parallelises e2e (21s → 12s on the host); the native suite stays serial because xdist gave no gain at ~5s. The AI found `-n auto` failing locally from memory starvation (4 servers + 4 Chromiums in a Colima VM shared with minikube) and set local workers to 2, keeping `-n auto` on 16 GB CI runners.
