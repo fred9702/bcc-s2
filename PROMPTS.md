@@ -78,7 +78,10 @@ Outcome: `cd.yml` runs after CI on main. Matrix (staging → prod, sequential): 
 
 Outcome: `tests/app/` AppTest suite (widgets, tabs, env, fail-fast) and `tests/e2e/` pytest-playwright suite against a live server started by a session fixture. `pytest` runs native, `pytest -m e2e` runs browser tests. New `app-tests.yml`: native on branch pushes, Playwright on PRs into main. The AI found `st.cache_data` leaking between AppTest runs (missing-data test passed on cached prices) and added a cache-clearing fixture; a segmented-control locator was fixed by asserting on behaviour (total return changes) rather than a role.
 
-<<<<<<< HEAD
+> "Ensure you use the Playwright base image for those tests + use pytest-xdist to run tests in parallel where appropriate"
+
+Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble` (with `--ipc=host`), and `playwright` is pinned to exactly 1.65.1 so library and browsers always match. `make e2e` uses the same image. pytest-xdist parallelises e2e (21s → 12s on the host); the native suite stays serial because xdist gave no gain at ~5s. The AI found `-n auto` failing locally from memory starvation (4 servers + 4 Chromiums in a Colima VM shared with minikube) and set local workers to 2, keeping `-n auto` on 16 GB CI runners.
+
 ## 10. Docs
 
 > "Please add placeholders for any tooling … please include key prompts."
@@ -91,8 +94,3 @@ Outcome: README with a Mermaid architecture diagram, features, pipeline table, d
 - **The human steered and reviewed**: chose the stack (Terragrunt, minikube, Terraform k8s provider, uv, stacked PRs), challenged trade-offs (Kustomize vs Terragrunt), caught the missing credits, set CI cost constraints, asked for native + Playwright testing, reviewed and merged every PR.
 - **The AI found and fixed real issues**: yfinance cache lock, hadolint DL3025, missing buildx, PSA rejection from the provider's `runAsNonRoot` default, `st.cache_data` leaking across AppTest runs, a deleted `trivy-action` tag, and a GitHub billing lock blocking Actions.
 - **lat.md** kept a live architecture knowledge graph (`lat.md/`) that the agent updated and validated (`lat check`) with every PR.
-=======
-> "Ensure you use the Playwright base image for those tests + use pytest-xdist to run tests in parallel where appropriate"
-
-Outcome: the e2e job runs in `mcr.microsoft.com/playwright/python:v1.65.1-noble` (with `--ipc=host`), and `playwright` is pinned to exactly 1.65.1 so library and browsers always match. `make e2e` uses the same image. pytest-xdist parallelises e2e (21s → 12s on the host); the native suite stays serial because xdist gave no gain at ~5s. The AI found `-n auto` failing locally from memory starvation (4 servers + 4 Chromiums in a Colima VM shared with minikube) and set local workers to 2, keeping `-n auto` on 16 GB CI runners.
->>>>>>> feat/08-app-tests
