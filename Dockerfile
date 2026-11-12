@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
 # ---------- runtime: slim, non-root, no build tooling ----------
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.15-slim-bookworm AS runtime
 ARG APP_VERSION=dev
 LABEL org.opencontainers.image.source="https://github.com/fred9702/bcc-s2" \
       org.opencontainers.image.title="bcc-s2" \
