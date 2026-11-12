@@ -21,3 +21,11 @@ Outcome: AI recommended uv, a committed CSV subset, real (free) security scanner
 Outcome: AI clarified that breadth comes from Terraform (Terragrunt is a DRY/orchestration wrapper), and that Terragrunt env inputs replace Kustomize overlays when workloads are managed via the TF Kubernetes provider. Trade-off recorded in `lat.md/architecture.md`.
 
 > "Call it bcc-s2. I also want lat.md initiated in the repo."
+
+## 3. Data
+
+> "For stock peers, why don't we use a script that pulls <1MiB worth of yfinance data? Reduces UI toil."
+
+Decision (human): use a fetch script for recent data instead of the Kaggle stock-market dataset, which ends in 2020 (and needs a Kaggle login, so CI could not fetch it anyway).
+
+Outcome: `scripts/fetch_data.py` snapshots VOD.L + 7 telecom peers (5y daily, ~560 KiB) and a synthetic vol surface. Size guard keeps it ConfigMap-compatible. A yfinance SQLite cache lock (`database is locked`) on concurrent downloads was fixed by the AI with `threads=False` and an empty-ticker guard.
