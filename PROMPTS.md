@@ -18,7 +18,7 @@ Outcome: AI recommended uv, a committed CSV subset, real (free) security scanner
 
 > "Wait, let's discuss Kustomize a bit more... Terragrunt essentially replaces Kustomize because it covers a wider range of providers, as opposed to just K8s?"
 
-Outcome: AI clarified that breadth comes from Terraform (Terragrunt is a DRY/orchestration wrapper), and that Terragrunt env inputs replace Kustomize overlays when workloads are managed via the TF Kubernetes provider. Trade-off recorded in `lat.md/architecture.md`.
+Outcome: AI confirmed the reasoning: Terragrunt env inputs replace Kustomize overlays when workloads are managed via the TF Kubernetes provider, and the same Terraform tooling covers non-K8s infra too. Decision recorded in `lat.md/architecture.md`.
 
 > "Call it bcc-s2. I also want lat.md initiated in the repo."
 
