@@ -21,7 +21,7 @@ jobs:
     name: Lint & type-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
@@ -30,7 +30,7 @@ jobs:
       - name: mypy
         run: uv run mypy src
       - name: hadolint
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.5.0
         with: { dockerfile: Dockerfile }
       - name: lat.md knowledge graph
         run: npx -y lat.md@0.13.3 check
@@ -39,7 +39,7 @@ jobs:
     name: Unit & app tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
       - run: uv sync --locked
@@ -56,7 +56,7 @@ jobs:
     name: SAST, SCA & secrets
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - uses: astral-sh/setup-uv@v6
         with: { enable-cache: true }
@@ -92,7 +92,7 @@ jobs:
     name: Terraform & Terragrunt validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
         with: { terraform_wrapper: false }
       - name: Install Terragrunt
@@ -123,10 +123,10 @@ jobs:
       packages: write
       security-events: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
       - id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE }}
           tags: |
@@ -157,7 +157,7 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
       - name: Upload Trivy SARIF to code scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         continue-on-error: true  # code scanning needs GHAS on private repos
         with: { sarif_file: trivy.sarif }
