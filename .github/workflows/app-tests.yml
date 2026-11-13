@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with: { enable-cache: true }
       - run: uv sync --locked
       - run: uv run pytest
@@ -52,7 +52,7 @@ jobs:
         run: >-
           uv run pytest -m e2e --no-cov -n "$E2E_WORKERS"
           --tracing=retain-on-failure --screenshot=only-on-failure --output=test-results
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure() && !env.ACT   # JS action; no Node in the container under act
         with:
           name: playwright-traces
