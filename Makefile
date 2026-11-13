@@ -49,8 +49,10 @@ ACT_PUSH  = act push -e .github/act/push.json $(ACT_FLAGS)
 .PHONY: act act-list act-ci act-image act-native act-e2e
 act-list:     ## list the jobs act can run
 	act -l
-act-ci:       ## CI quality gates: lint, test, security, infra
-	$(ACT_PUSH) -W .github/workflows/ci.yml -j lint -j test -j security -j infra
+CI_GATES ?= lint test security infra
+act-ci:       ## CI quality gates, one act run per job (act's -j takes a single job; the last one wins)
+	@set -e; for j in $(CI_GATES); do echo "==> act: ci.yml / $$j"; \
+	  $(ACT_PUSH) -W .github/workflows/ci.yml -j $$j; done
 act-image:    ## CI image job (runs the gates first via needs:) - slow
 	$(ACT_PUSH) -W .github/workflows/ci.yml -j image
 act-native:   ## app-tests: native AppTest job (branch push)
