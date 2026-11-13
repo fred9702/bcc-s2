@@ -21,4 +21,4 @@ uv gives faster resolution, a single lockfile and a simple multi-stage Docker bu
 
 ### Terragrunt over Kustomize
 
-Terraform with the Kubernetes provider manages workloads; Terragrunt env folders replace Kustomize overlays. GitOps (Argo CD + Kustomize/Helm) is the alternative at scale, giving continuous drift reconciliation.
+Terraform with the Kubernetes provider manages workloads; Terragrunt env folders replace Kustomize overlays.

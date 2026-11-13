@@ -141,7 +141,7 @@ uv run --group data python scripts/fetch_data.py   # fails if prices.csv > 1 MiB
 
 - **uv over Poetry**: faster, single lockfile, clean multi-stage Docker build.
 - **Committed CSV snapshot** instead of the Kaggle dataset (ends 2020, needs login) or live API calls. The app is deterministic and CI never hits a rate limit.
-- **Terraform k8s provider + Terragrunt over Kustomize**: Terragrunt env inputs replace Kustomize overlays, and the same tooling can later own the cluster (EKS, IAM, …). Trade-off: no continuous drift reconciliation; at scale I'd use Terraform for infra and Argo CD + Kustomize/Helm for workloads.
+- **Terraform k8s provider + Terragrunt over Kustomize**: Terragrunt env inputs replace Kustomize overlays, and the same tooling can later own the cluster (EKS, IAM, …).
 - **minikube in CI** so staging runs a real deploy (PSA, probes, rollout) instead of a dry run. It caught a real PSA rejection during development.
 - **CSV via ConfigMap**: data changes without rebuilding the image. A checksum annotation rolls pods, and the 1 MiB limit is enforced by the fetch script and a test.
 - **Free tools real, paid tools mocked**: everything that costs nothing runs for real.
