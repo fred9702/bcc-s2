@@ -8,6 +8,7 @@ include "envcommon" {
 }
 
 inputs = {
+  ingress_host = "bcc.localhost"
   namespace    = "bcc-prod"
   replicas     = 2
   max_replicas = 5

@@ -96,6 +96,12 @@ Outcome: README with a Mermaid architecture diagram, features, pipeline table, d
 
 Outcome: verified with real act runs on Colima/Apple silicon (native 23 passed, e2e 11 passed in the Playwright container, CI lint passed). Findings baked into the workflow: JS actions need Node inside job containers (the Playwright image has none under act), so the e2e job installs uv via pip and skips artifact upload when `ACT` is set; `E2E_WORKERS` caps xdist workers locally. act 0.2.97 refuses `--container-daemon-socket` in a project `.actrc`, so it goes on the command line.
 
+## 11. Ingress
+
+> "Add an ingress resource so the dashboard can be accessed from minikube"
+
+Outcome: optional `kubernetes_ingress_v1` in the module (ingress-nginx class, websocket-friendly timeouts), `*.localhost` hosts per environment (no DNS or /etc/hosts), minikube `ingress` addon in `make k8s-up`, `make k8s-tunnel` for macOS. Applied to minikube; verified host routing (right host 200, wrong host 404) and the full UI in a browser through the ingress controller. The first apply failed with "namespace already exists": the earlier `this` → `bccs2` rename (no `moved` blocks) made Terraform delete and recreate the namespace while the old one was still terminating; a re-run succeeded.
+
 ## How AI was used (summary)
 
 - **Claude Code did the hands-on work**: scaffolding, code, tests, Dockerfile, Terraform/Terragrunt, workflows, docs. It ran every tool locally (pytest, ruff, mypy, bandit, pip-audit, hadolint, actionlint, terraform, terragrunt, minikube, Playwright), and opened each stacked PR via `gh`.
